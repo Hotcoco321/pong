@@ -27,6 +27,9 @@
         let ballSpeedX = 5 * (Math.random() > 0.5 ? 1 : -1);
         let ballSpeedY = 5 * (Math.random() > 0.5 ? 1 : -1);
 
+        //Rainbow color for ball
+        let ballColor = 0;
+
         //Controls with "W/S" for left paddle and "ArrowUp/ArrowDown" keys for right paddle
         let wPressed = false, sPressed = false;
         let upPressed = false, downPressed = false;
@@ -112,13 +115,16 @@
                 leftScore++;
                 resetBall();
             }
+
+            //Updates ball color for rainbow effect
+            ballColor = (ballColor + 3) % 360;
         }
 
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             drawRect(0, leftPaddleY, paddleWidth, paddleHeight, '#fff');
             drawRect(canvas.width - paddleWidth, rightPaddleY, paddleWidth, paddleHeight, '#fff');
-            drawBall(ballX, ballY, ballSize, '#fff');
+            drawBall(ballX, ballY, ballSize, `hsl(${ballColor}, 100%, 50%)`);
             drawText(leftScore, canvas.width / 4, 60, '#fff');
             drawText(rightScore, 3 * canvas.width / 4, 60, '#fff');
         }
