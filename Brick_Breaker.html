@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Brick Breaker with Power-Ups</title>
+    <style>
+        body { background: #222; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        canvas { background: #000; display: block; margin: auto; border: 2px solid #fff; }
+    </style>
+</head>
+<body>
+<canvas id="bb" width="800" height="600"></canvas>
+<script>
+const canvas = document.getElementById('bb');
+const ctx = canvas.getContext('2d');
+
+//Paddle
+let paddleWidth = 100, paddleHeight = 15;
+let paddleX = (canvas.width - paddleWidth) / 2;
+const paddleSpeed = 8;
+
+//Ball(s)
+const ballRadius = 8;
+let balls = [{ x: canvas.width / 2, y: canvas.height - 30, dx: 3.5, dy: -2.5 }];
+
+//Bricks
+const brickRowCount = 5;
+const brickColumnCount = 8;
+const brickWidth = 80;
+const brickHeight = 20;
+const brickPadding = 10;
+const brickOffsetTop = 40;
+const brickOffsetLeft = 35;
+
+let bricks = [];
+for (let c = 0; c < brickColumnCount; c++) {
+    bricks[c] = [];
+    for (let r = 0; r < brickRowCount; r++) {
+        bricks[c][r] = { x: 0, y: 0, status: 1 };
+    }
+}
+
+let rightPressed = false;
+let leftPressed = false;
+let score = 0;
+
+//Power-ups
+let powerUps = [];
+const powerTypes = ["expand", "slow", "multi"];
+
+document.addEventListener("keydown", keyDownHandler, false);
+document.addEventListener("keyup", keyUpHandler, false);
+
+function keyDownHandler(e) {
+    if (e.key === "Right" || e.key === "ArrowRight") rightPressed = true;
+    else if (e.key === "Left" || e.key === "ArrowLeft") leftPressed = true;
+}
+function keyUpHandler(e) {
+    if (e.key === "Right" || e.key === "ArrowRight") rightPressed = false;
+    else if (e.key === "Left" || e.key === "ArrowLeft") leftPressed = false;
+}
+
+function drawBricks() {
+    for (let c = 0; c < brickColumnCount; c++) {
+        for (let r = 0; r < brickRowCount; r++) {
+            if (bricks[c][r].status === 1) {
+                let brickX = (c * (brickWidth + brickPadding)) + brickOffsetLeft;
+                let brickY = (r * (brickHeight + brickPadding)) + brickOffsetTop;
+                bricks[c][r].x = brickX;
+                bricks[c][r].y = brickY;
+                ctx.fillStyle = `hsl(${r * 60}, 80%, 50%)`;
+                ctx.fillRect(brickX, brickY, brickWidth, brickHeight);
+            }
+        }
+    }
+}
+
+function spawnPowerUp(x, y) {
+    if (Math.random() < 0.05) { //5% chance to spawn power ups
+        let type = powerTypes[Math.floor(Math.random() * powerTypes.length)];
+        powerUps.push({ x, y, type, radius: 10 });
+    }
+}
+
+function drawPowerUps() {
+    powerUps.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = p.type === "expand" ? "lime" : p.type === "slow" ? "cyan" : "orange";
+        ctx.fill();
+        ctx.closePath();
+    });
+}
+
+function updatePowerUps() {
+    for (let i = powerUps.length - 1; i >= 0; i--) {
+        let p = powerUps[i];
+        p.y += 3;
+        if (p.y > canvas.height - paddleHeight - 10 &&
+            p.x > paddleX && p.x < paddleX + paddleWidth) {
+            activatePowerUp(p.type);
+            powerUps.splice(i, 1);
+        } else if (p.y > canvas.height) {
+            powerUps.splice(i, 1);
+        }
+    }
+}
+
+function activatePowerUp(type) {
+    if (type === "expand") {
+        paddleWidth += 40;
+        setTimeout(() => { paddleWidth -= 40; }, 10000);
+    } else if (type === "slow") {
+        balls.forEach(b => { b.dx *= 0.6; b.dy *= 0.6; });
+        setTimeout(() => { balls.forEach(b => { b.dx *= 1.67; b.dy *= 1.67; }); }, 8000);
+    } else if (type === "multi") {
+        let newBalls = balls.map(b => ({ x: b.x, y: b.y, dx: -b.dx, dy: b.dy }));
+        balls = balls.concat(newBalls);
+    }
+}
+
+function collisionDetection() {
+    for (let c = 0; c < brickColumnCount; c++) {
+        for (let r = 0; r < brickRowCount; r++) {
+            let b = bricks[c][r];
+            if (b.status === 1) {
+                balls.forEach(ball => {
+                    if (ball.x > b.x && ball.x < b.x + brickWidth &&
+                        ball.y > b.y && ball.y < b.y + brickHeight) {
+                        ball.dy = -ball.dy;
+                        b.status = 0;
+                        score++;
+                        spawnPowerUp(b.x + brickWidth / 2, b.y + brickHeight / 2);
+                        if (score === brickRowCount * brickColumnCount) {
+                            alert("YOU WIN!");
+                            document.location.reload();
+                        }
+                    }
+                });
+            }
+        }
+    }
+}
+
+function drawBalls() {
+    balls.forEach(ball => {
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, ballRadius, 0, Math.PI * 2);
+        ctx.fillStyle = "#fff";
+        ctx.fill();
+        ctx.closePath();
+    });
+}
+
+function drawPaddle() {
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(paddleX, canvas.height - paddleHeight - 10, paddleWidth, paddleHeight);
+}
+
+function drawScore() {
+    ctx.font = "20px Arial";
+    ctx.fillStyle = "#fff";
+    ctx.fillText("Score: " + score, 8, 28);
+}
+
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBricks();
+    drawBalls();
+    drawPaddle();
+    drawScore();
+    drawPowerUps();
+    collisionDetection();
+    updatePowerUps();
+
+    //Ball movement and collision
+    balls.forEach((ball, index) => {
+        ball.x += ball.dx;
+        ball.y += ball.dy;
+
+        if (ball.x + ballRadius > canvas.width || ball.x - ballRadius < 0) ball.dx = -ball.dx;
+        if (ball.y - ballRadius < 0) ball.dy = -ball.dy;
+
+        if (ball.y + ballRadius > canvas.height - paddleHeight - 10 &&
+            ball.x > paddleX && ball.x < paddleX + paddleWidth) {
+            ball.dy = -ball.dy;
+        } else if (ball.y + ballRadius > canvas.height) {
+            balls.splice(index, 1);
+            if (balls.length === 0) {
+                alert("GAME OVER");
+                document.location.reload();
+            }
+        }
+    });
+
+    //Paddle movement
+    if (rightPressed && paddleX < canvas.width - paddleWidth) paddleX += paddleSpeed;
+    if (leftPressed && paddleX > 0) paddleX -= paddleSpeed;
+
+    requestAnimationFrame(draw);
+}
+
+draw();
+</script>
+</body>
+</html>
