@@ -175,23 +175,32 @@ function draw() {
 
     //Ball movement and collision
     balls.forEach((ball, index) => {
-        ball.x += ball.dx;
-        ball.y += ball.dy;
+    ball.x += ball.dx;
+    ball.y += ball.dy;
 
-        if (ball.x + ballRadius > canvas.width || ball.x - ballRadius < 0) ball.dx = -ball.dx;
-        if (ball.y - ballRadius < 0) ball.dy = -ball.dy;
+    if (ball.x + ballRadius > canvas.width || ball.x - ballRadius < 0) ball.dx = -ball.dx;
+    if (ball.y - ballRadius < 0) ball.dy = -ball.dy;
 
-        if (ball.y + ballRadius > canvas.height - paddleHeight - 10 &&
-            ball.x > paddleX && ball.x < paddleX + paddleWidth) {
-            ball.dy = -ball.dy;
-        } else if (ball.y + ballRadius > canvas.height) {
-            balls.splice(index, 1);
-            if (balls.length === 0) {
-                alert("GAME OVER");
-                document.location.reload();
-            }
+    if (
+        ball.y + ballRadius > canvas.height - paddleHeight - 10 &&
+        ball.x > paddleX && ball.x < paddleX + paddleWidth
+    ) {
+        ball.dy = -ball.dy;
+
+        //Calculate hit position:-1 (left edge),0 (center),1 (right edge)
+        let hitPos = ((ball.x - paddleX) / paddleWidth) - 0.5;
+        ball.dx += hitPos * 7; //Adjust for more/less effect
+
+        ball.dx = Math.max(Math.min(ball.dx, 8), -8);
+    }
+    else if (ball.y + ballRadius > canvas.height) {
+        balls.splice(index, 1);
+        if (balls.length === 0) {
+            alert("GAME OVER");
+            document.location.reload();
         }
-    });
+    }
+});
 
     //Paddle movement
     if (rightPressed && paddleX < canvas.width - paddleWidth) paddleX += paddleSpeed;
@@ -203,4 +212,5 @@ function draw() {
 draw();
 </script>
 </body>
+
 </html>
