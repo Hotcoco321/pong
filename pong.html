@@ -19,9 +19,11 @@
         function drawBackground() {
         bgOffset += 0.5;
         let gradient = ctx.createLinearGradient(0, bgOffset % canvas.height, canvas.width, canvas.height);
-        gradient.addColorStop(0, "#2b2d42");
+        //you can update any of these colors to how you would like
+        gradient.addColorStop(0, "#03fcec");
         gradient.addColorStop(0.5, "#8d99ae");
-        gradient.addColorStop(1, "#ef233c");
+        gradient.addColorStop(1, "#03a9fc");
+        ctx.fillStyle = gradient;
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -158,5 +160,6 @@
     </script>
 </body>
 </html>
+
 
 
