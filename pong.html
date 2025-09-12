@@ -14,6 +14,17 @@
         const canvas = document.getElementById('pong');
         const ctx = canvas.getContext('2d');
 
+        //Makes fun background
+        let bgOffset = 0;
+        function drawBackground() {
+        bgOffset += 0.5;
+        let gradient = ctx.createLinearGradient(0, bgOffset % canvas.height, canvas.width, canvas.height);
+        gradient.addColorStop(0, "#2b2d42");
+        gradient.addColorStop(0.5, "#8d99ae");
+        gradient.addColorStop(1, "#ef233c");
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
         //Paddles, ball, and score objects
         const paddleWidth = 10, paddleHeight = 100;
         let leftPaddleY = canvas.height / 2 - paddleHeight / 2;
@@ -129,14 +140,13 @@
         }
 
         function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawRect(0, leftPaddleY, paddleWidth, paddleHeight, '#fff');
-            drawRect(canvas.width - paddleWidth, rightPaddleY, paddleWidth, paddleHeight, '#fff');
-            drawBall(ballX, ballY, ballSize, `hsl(${ballColor}, 100%, 50%)`);
-            drawBall(ballX, ballY, ballSize, '#fff');
-            drawText(leftScore, canvas.width / 4, 60, '#fff');
-            drawText(rightScore, 3 * canvas.width / 4, 60, '#fff');
-        }
+        drawBackground();//Draws fun background
+        drawRect(0, leftPaddleY, paddleWidth, paddleHeight, '#fff');
+        drawRect(canvas.width - paddleWidth, rightPaddleY, paddleWidth, paddleHeight, '#fff');
+        drawBall(ballX, ballY, ballSize, `hsl(${ballColor}, 100%, 50%)`);
+        drawText(leftScore, canvas.width / 4, 60, '#fff');
+        drawText(rightScore, 3 * canvas.width / 4, 60, '#fff');
+    }
 
         function gameLoop() {
             update();
@@ -148,4 +158,5 @@
     </script>
 </body>
 </html>
+
 
