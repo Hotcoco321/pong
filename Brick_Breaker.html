@@ -86,7 +86,7 @@ function drawPowerUps() {
     powerUps.forEach(p => {
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fillStyle = p.type === "expand" ? "lime" : p.type === "slow" ? "cyan" : "orange";
+        ctx.fillStyle = p.type === "expand" ? "lime" : p.type === "slow" ? "cyan" : p.type === "multi" ? "orange" : "white";
         ctx.fill();
         ctx.closePath();
     });
@@ -214,3 +214,4 @@ draw();
 </body>
 
 </html>
+
